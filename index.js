@@ -6,7 +6,7 @@ var bodyParser = require('body-parser')
 
 datastore = require('@google-cloud/datastore')({
   projectId: 'conferencify-2018',
-  keyFilename: 'security/keyfile.json'
+  keyFilename: 'keyfile.json'
 })
 
 app.use(bodyParser.urlencoded({extended: true}))
