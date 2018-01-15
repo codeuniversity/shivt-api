@@ -1,10 +1,19 @@
-var express = require('express');
-var app = express();
-var port = 8000;
+/* eslint no-undef: "off" */
+var express = require('express')
+var app = express()
+var port = process.env.PORT || 3000
+var bodyParser = require('body-parser')
 
-app.get('/', function(req, res){
-  res.send('Welcome to the API! :)');
-});
+datastore = require('@google-cloud/datastore')({
+  projectId: 'conferencify-2018',
+  keyFilename: 'security/keyfile.json'
+})
 
-app.listen(port);
-console.log("Server running on port "+port+".");
+app.use(bodyParser.urlencoded({extended: true}))
+app.use(bodyParser.json())
+var routes = require('./router/index')
+routes(app)
+
+app.listen(port)
+
+console.log('todo list RESTful API server started on: ' + port)
