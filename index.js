@@ -11,7 +11,7 @@ GLOBAL.datastore = require('@google-cloud/datastore')({
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
-var routes = require('./router/index');
+var routes = require('./routes/index');
 routes(app);
 
 app.listen(port);
