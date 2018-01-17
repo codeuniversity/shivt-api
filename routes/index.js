@@ -1,11 +1,17 @@
 'use strict'
-module.exports = function (app) {
+
+const express = require('express');
+const router = express.Router();
 
     const eventRoutes = require('./event');
+    const talksRoutes = require('./talks');
 
-    app.get('/', function (req, res) {
+router.get('/', function (req, res) {
         res.send('Welcome to this awesome API!');
     })
 
-    app.use("/event", eventRoutes);
-};
+    router.use("/event", eventRoutes);
+    router.use("/event/:eventId/talks", talksRoutes);
+
+
+module.exports = router;

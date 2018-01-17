@@ -3,6 +3,7 @@ var express = require('express');
 var app = express();
 var port = process.env.PORT || 3000;
 var bodyParser = require('body-parser');
+var routes = require('./routes/index');
 
 GLOBAL.datastore = require('@google-cloud/datastore')({
   projectId: 'conferencify-2018',
@@ -11,9 +12,9 @@ GLOBAL.datastore = require('@google-cloud/datastore')({
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
-var routes = require('./routes/index');
-routes(app);
+
+app.use("/api/v1", routes);
 
 app.listen(port);
 
-console.log('Conferencify RESTful API server started on: ' + port);
+console.log('Shivt RESTful API server started on: ' + port);
