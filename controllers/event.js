@@ -3,18 +3,18 @@
 const errors = require('../util/error_handling');
 
 function show (req, res) {
-    GLOBAL.datastore.get(GLOBAL.datastore.key(['event', parseInt(req.params.eventId)]))
+    GLOBAL.datastore.get(GLOBAL.datastore.key(['Event', parseInt(req.params.eventId)]))
         .then((results) => {
             res.json({"status": "OK", "event":
                     {
                         "name": results[0].name,
                         "description": results[0].description,
-                        "starting_date": results[0].starting_date,
-                        "ending_date": results[0].ending_date,
+                        "startingDate": results[0].startingDate,
+                        "endingDate": results[0].endingDate,
                         "location": results[0].location,
                         "coordinates": results[0].coordinates,
-                        "primary_color": results[0].primary_color,
-                        "secondary_color": results[0].secondary_color
+                        "primaryColor": results[0].primaryColor,
+                        "accentColor": results[0].accentColor
                     }});
         }).catch(function (err) {
             errors.handle(err, res);

@@ -6,7 +6,7 @@ function index (req, res) {
 
     // TODO: Return basic speaker data (e.g. name, company)
 
-    const query = datastore.createQuery('talk').hasAncestor(datastore.key(['event', parseInt(req.params.eventId)]));
+    const query = datastore.createQuery('Talk').hasAncestor(datastore.key(['Event', parseInt(req.params.eventId)]));
     GLOBAL.datastore.runQuery(query)
         .then((results) => {
             const talks = [];
@@ -14,9 +14,9 @@ function index (req, res) {
                 talks.push({
                     'name': talk.name,
                     'description': talk.description,
-                    'starting_date': talk.starting_date,
-                    'ending_date': talks.ending_date,
-                    'location': talks.location
+                    'startingDate': talk.startingDate,
+                    'endingDate': talk.endingDate,
+                    'location': talk.location
                 });
             });
             res.json({"status": "OK", "talks":talks});
