@@ -1,30 +1,75 @@
 'use strict';
 
 const errors = require('../util/error_handling');
+const helpers = require('../util/helpers');
 
-function index (req, res) {
-
-    // TODO: Return basic speaker data (e.g. name, company)
-
-    const query = datastore.createQuery('Talk').hasAncestor(datastore.key(['Event', parseInt(req.params.eventId)]));
-    GLOBAL.datastore.runQuery(query)
-        .then((results) => {
-            const talks = [];
-            results[0].forEach(function (talk) {
-                talks.push({
-                    'name': talk.name,
-                    'description': talk.description,
-                    'startingDate': talk.startingDate,
-                    'endingDate': talk.endingDate,
-                    'location': talk.location
+function index(req, res) {
+    const query = datastore.createQuery('Talk').order('startingDate').hasAncestor(datastore.key(['Event', parseInt(req.params.eventId)]));
+    GLOBAL.datastore.runQuery(query, (err, entities) => {
+        if(err) {
+            errors.handle(err, res);
+        }
+        let downloadedTalks = 0;
+        const talks = [];
+        let conferenceDay = [];
+        entities.forEach((talk) => {
+            if(conferenceDay.length === 0) {
+                console.log(talk.startingDate);
+                conferenceDay = {
+                    'date': helpers.normalizeDate(new Date(talk.startingDate)).toISOString(),
+                    'talks': []
+                }
+            }
+            const speakers = [];
+            GLOBAL.datastore.runQuery(GLOBAL.datastore.createQuery('_TalkSpeaker').filter('talk', '=', talk[GLOBAL.datastore.KEY]), (err, speaker_ids) => {
+                if(err) {
+                    errors.handle(err, res);
+                }
+                speaker_ids.forEach((speaker_id) => {
+                    GLOBAL.datastore.get(speaker_id.speaker)
+                        .then((speaker) => {
+                            speakers.push({
+                                'id': speaker[0][GLOBAL.datastore.KEY].id,
+                                'firstname': speaker[0].firstname,
+                                'lastname': speaker[0].lastname,
+                                'company': speaker[0].company,
+                                'position': speaker[0].position,
+                                'photo': speaker[0].photo,
+                            });
+                            if(speakers.length === speaker_ids.length) {
+                                console.log(conferenceDay['talks'][conferenceDay['talks'].length-1]);
+                                if(conferenceDay['talks'].length !== 0 && helpers.normalizeDate(new Date(talk.startingDate)).toISOString() !== helpers.normalizeDate(new Date(conferenceDay['talks'][conferenceDay['talks'].length-1].startingDate)).toISOString()) {
+                                    talks.push(conferenceDay);
+                                    conferenceDay = {
+                                        'date': helpers.normalizeDate(new Date(talk.startingDate)).toISOString(),
+                                        'talks': []
+                                    }
+                                }
+                                    console.log("push...");
+                                    conferenceDay['talks'].push({
+                                        'name': talk.name,
+                                        'description': talk.description,
+                                        'type': talk.type,
+                                        'startingDate': talk.startingDate,
+                                        'endingDate': talk.endingDate,
+                                        'location': talk.location,
+                                        'speakers': speakers
+                                    });
+                                    downloadedTalks++;
+                                if(downloadedTalks === entities.length) {
+                                    talks.push(conferenceDay);
+                                    res.json({'status': 'OK', 'talks': talks});
+                                }
+                            }
+                        }).catch(function (err) {
+                        errors.handle(err, res);
+                    });
                 });
             });
-            res.json({"status": "OK", "talks":talks});
-        }).catch(function (err) {
-            errors.handle(err, res);
-    })
+        });
+    });
 }
 
-module.exports = {
-    index: index
-};
+    module.exports = {
+        index: index
+    };
