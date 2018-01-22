@@ -3,7 +3,7 @@
 const errors = require('../util/error_handling');
 
 function show (req, res) {
-    GLOBAL.datastore.get(GLOBAL.datastore.key(['Event', parseInt(req.params.eventId)]))
+    global.datastore.get(global.datastore.key(['Event', parseInt(req.params.eventId)]))
         .then((results) => {
             res.json({"status": "OK", "event":
                     {

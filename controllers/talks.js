@@ -5,7 +5,7 @@ const helpers = require('../util/helpers');
 
 function index(req, res) {
     const query = datastore.createQuery('Talk').order('startingDate').hasAncestor(datastore.key(['Event', parseInt(req.params.eventId)]));
-    GLOBAL.datastore.runQuery(query, (err, entities) => {
+    global.datastore.runQuery(query, (err, entities) => {
         if(err) {
             errors.handle(err, res);
         }
@@ -21,15 +21,15 @@ function index(req, res) {
                 }
             }
             const speakers = [];
-            GLOBAL.datastore.runQuery(GLOBAL.datastore.createQuery('_TalkSpeaker').filter('talk', '=', talk[GLOBAL.datastore.KEY]), (err, speaker_ids) => {
+            global.datastore.runQuery(global.datastore.createQuery('_TalkSpeaker').filter('talk', '=', talk[global.datastore.KEY]), (err, speaker_ids) => {
                 if(err) {
                     errors.handle(err, res);
                 }
                 speaker_ids.forEach((speaker_id) => {
-                    GLOBAL.datastore.get(speaker_id.speaker)
+                    global.datastore.get(speaker_id.speaker)
                         .then((speaker) => {
                             speakers.push({
-                                'id': speaker[0][GLOBAL.datastore.KEY].id,
+                                'id': speaker[0][global.datastore.KEY].id,
                                 'firstname': speaker[0].firstname,
                                 'lastname': speaker[0].lastname,
                                 'company': speaker[0].company,
