@@ -3,17 +3,16 @@
 const express = require( "express" );
 const router = express.Router();
 
-const eventRoutes = require( "./event" );
+const eventsRoutes = require( "./events" );
 const talksRoutes = require( "./talks" );
-const mockRoutes = require( "./mock" );
+const speakersRoutes = require( "./speakers" );
 
 router.get( "/", ( req, res ) => {
     res.send( "Welcome to this awesome API!" );
 } );
 
-router.use( "/event", eventRoutes );
-router.use( "/event/:eventId/talks", talksRoutes );
-router.use( "/event/:eventId/mock", mockRoutes );
-
+router.use( "/events", eventsRoutes );
+router.use( "/events/:eventId/talks", talksRoutes );
+router.use( "/events/:eventId/speakers", speakersRoutes );
 
 module.exports = router;

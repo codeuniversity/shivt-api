@@ -1,7 +1,7 @@
 "use strict"
 
 const express = require( "express" );
-const eventController = require( "../controllers/event" );
+const eventController = require( "../controllers/events" );
 
 let router = express.Router();
 

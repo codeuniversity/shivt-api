@@ -4,7 +4,7 @@ const errors = require('../util/error_handling');
 const helpers = require('../util/helpers');
 
 function index(req, res) {
-    const query = datastore.createQuery('Talk').order('startingDate').hasAncestor(datastore.key(['Event', parseInt(req.params.eventId)]));
+    const query = global.datastore.createQuery('Talk').order('startingDate').hasAncestor(datastore.key(['Event', parseInt(req.params.eventId)]));
     global.datastore.runQuery(query, (err, entities) => {
         if(err) {
             errors.handle(err, res);
@@ -25,10 +25,15 @@ function index(req, res) {
                 if(err) {
                     errors.handle(err, res);
                 }
+
+                // TODO: Use batch operation to retrieve multiple speakers at once
+
                 speaker_ids.forEach((speaker_id) => {
-                    global.datastore.get(speaker_id.speaker)
-                        .then((speaker) => {
-                            speakers.push({
+                    global.datastore.get(speaker_id.speaker, function (err, speaker) {
+                        if(err) {
+                            errors.handle(err, res)
+                        }
+                        speakers.push({
                                 'id': speaker[0][global.datastore.KEY].id,
                                 'firstname': speaker[0].firstname,
                                 'lastname': speaker[0].lastname,
@@ -61,14 +66,14 @@ function index(req, res) {
                                     res.json({'status': 'OK', 'talks': talks});
                                 }
                             }
-                        }).catch(function (err) {
-                        errors.handle(err, res);
+                        })
                     });
                 });
             });
         });
-    });
-}
+    }
+
+    // TODO: Add show function for retrieving single talk.
 
     module.exports = {
         index: index
