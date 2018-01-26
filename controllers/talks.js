@@ -4,77 +4,63 @@ const errors = require('../util/error_handling');
 const helpers = require('../util/helpers');
 
 function index(req, res) {
-    const query = global.datastore.createQuery('Talk').order('startingDate').hasAncestor(datastore.key(['Event', parseInt(req.params.eventId)]));
+    const query = global.datastore.createQuery('Talk').hasAncestor(datastore.key(['Event', parseInt(req.params.eventId)]));
     global.datastore.runQuery(query, (err, entities) => {
         if(err) {
             errors.handle(err, res);
         }
         let downloadedTalks = 0;
         const talks = [];
-        let conferenceDay = [];
         entities.forEach((talk) => {
-            if(conferenceDay.length === 0) {
-                console.log(talk.startingDate);
-                conferenceDay = {
-                    'date': helpers.normalizeDate(new Date(talk.startingDate)).toISOString(),
-                    'talks': []
-                }
-            }
             const speakers = [];
-            global.datastore.runQuery(global.datastore.createQuery('_TalkSpeaker').filter('talk', '=', talk[global.datastore.KEY]), (err, speaker_ids) => {
+            global.datastore.runQuery(global.datastore.createQuery('_TalkSpeaker').filter('talk', '=', talk[global.datastore.KEY]), (err, result_keys) => {
                 if(err) {
                     errors.handle(err, res);
                 }
-
-                // TODO: Use batch operation to retrieve multiple speakers at once
-
-                speaker_ids.forEach((speaker_id) => {
-                    global.datastore.get(speaker_id.speaker, function (err, speaker) {
-                        if(err) {
-                            errors.handle(err, res)
-                        }
-                        speakers.push({
-                                'id': speaker[0][global.datastore.KEY].id,
-                                'firstname': speaker[0].firstname,
-                                'lastname': speaker[0].lastname,
-                                'company': speaker[0].company,
-                                'position': speaker[0].position,
-                                'photo': speaker[0].photo,
-                            });
-                            if(speakers.length === speaker_ids.length) {
-                                console.log(conferenceDay['talks'][conferenceDay['talks'].length-1]);
-                                if(conferenceDay['talks'].length !== 0 && helpers.normalizeDate(new Date(talk.startingDate)).toISOString() !== helpers.normalizeDate(new Date(conferenceDay['talks'][conferenceDay['talks'].length-1].startingDate)).toISOString()) {
-                                    talks.push(conferenceDay);
-                                    conferenceDay = {
-                                        'date': helpers.normalizeDate(new Date(talk.startingDate)).toISOString(),
-                                        'talks': []
-                                    }
-                                }
-                                    console.log("push...");
-                                    conferenceDay['talks'].push({
-                                        'name': talk.name,
-                                        'description': talk.description,
-                                        'type': talk.type,
-                                        'startingDate': talk.startingDate,
-                                        'endingDate': talk.endingDate,
-                                        'location': talk.location,
-                                        'speakers': speakers
-                                    });
+                result_keys.forEach((result_key) => {
+                        speakers.push(result_key.speaker.id);
+                            if(speakers.length === result_keys.length) {
+                                    helpers.sortTalk(talks, helpers.talkSerializer(talk, speakers))
                                     downloadedTalks++;
                                 if(downloadedTalks === entities.length) {
-                                    talks.push(conferenceDay);
-                                    res.json({'status': 'OK', 'talks': talks});
+                                    talks.forEach(function (day) {
+                                        helpers.sortByKey(day.talks, 'startingDate');
+                                    })
+                                    helpers.sortByKey(talks, 'date');
+                                    res.json({'status': 'OK', 'talks': talks})
                                 }
                             }
-                        })
                     });
                 });
             });
         });
     }
 
-    // TODO: Add show function for retrieving single talk.
+function show(req, res) {
+
+    // IMPORTANT: In case the requested ID has an ancestor, datastore.key takes four parameters.
+
+    const talkKey = global.datastore.key(['Event', parseInt(req.params.eventId), 'Talk', parseInt(req.params.talkId)])
+    global.datastore.get(talkKey, function (err, talk) {
+        if(err) {
+            errors.handle(err, res)
+        }
+        const speakers = [];
+        global.datastore.runQuery(global.datastore.createQuery('_TalkSpeaker').filter('talk', '=', talk[global.datastore.KEY]), (err, result_keys) => {
+            if(err) {
+                errors.handle(err, res);
+            }
+            result_keys.forEach((result_key) => {
+                speakers.push(result_key.speaker.id);
+                if(speakers.length === result_keys.length) {
+                        res.json({'status': 'OK', 'talk': helpers.talkSerializer(talk, speakers)})
+                    }
+                });
+            });
+        });
+    }
 
     module.exports = {
-        index: index
+        index: index,
+        show: show
     };

@@ -1,11 +1,10 @@
 "use strict"
 
-const errors = require("../util/error_handling");
-
-// TODO: Distinguish datasets between index and show
+const errors = require("../util/error_handling")
+const helpers = require("../util/helpers")
 
 function index(req, res) {
-    const query = global.datastore.createQuery('Attendee').order('lastname').filter('type', '=', 1).hasAncestor(datastore.key(['Event', parseInt(req.params.eventId)]))
+    const query = global.datastore.createQuery('Attendee').filter('type', '=', 1).hasAncestor(datastore.key(['Event', parseInt(req.params.eventId)]))
     global.datastore.runQuery(query, (err, entities) => {
         if (err) {
             errors.handle(err, res)
@@ -13,19 +12,9 @@ function index(req, res) {
         let speakers = []
         entities.forEach(function (speaker) {
             console.log(speaker[global.datastore.KEY]);
-            speakers.push({
-                'id': speaker[global.datastore.KEY].id,
-                'firstname': speaker.firstname,
-                'lastname': speaker.lastname,
-                'photo': speaker.photo,
-                'company': speaker.company,
-                'position': speaker.position,
-                'description': speaker.description,
-                'socialMedia': {
-                    'linkedIn': speaker.linkedIn
-                }
-            })
+            speakers.push(helpers.speakerSerializer(speaker))
             if (speakers.length === entities.length) {
+                helpers.sortByKey(speakers,'lastname')
                 res.json({'status': 'OK', 'speakers': speakers})
             }
         })
@@ -42,18 +31,7 @@ function show(req, res) {
         if(err) {
             errors.handle(err, res)
         }
-        res.json({
-            'id': speaker[global.datastore.KEY].id,
-            'firstname': speaker.firstname,
-            'lastname': speaker.lastname,
-            'photo': speaker.photo,
-            'company': speaker.company,
-            'position': speaker.position,
-            'description': speaker.description,
-            'socialMedia': {
-                'linkedIn': speaker.linkedIn
-            }
-        })
+        res.json({'status': 'OK', 'speaker': helpers.speakerSerializer(speaker)})
     })
 }
 

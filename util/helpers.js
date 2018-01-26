@@ -5,6 +5,66 @@ function normalizeDate(date) {
     return date;
 }
 
+function sortTalk(talks, talk) {
+    let found = false;
+    for(let i = 0; i < talks.length; i++) {
+        if(normalizeDate(new Date(talk.startingDate)).toISOString() === talks[i].date) {
+            talks[i].talks.push(talk)
+            found = true;
+            break;
+        }
+    }
+    if(!found) {
+        talks.push({
+            'date': normalizeDate(new Date(talk.startingDate)).toISOString(),
+            'talks': [
+                talk
+            ]
+        })
+    }
+}
+
+function sortByKey(array, key) {
+    return array.sort(function(a, b) {
+        var x = a[key]; var y = b[key];
+        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    });
+}
+
+function talkSerializer(talk, speakers) {
+    return {
+        'id': talk[global.datastore.KEY].id,
+        'name': talk.name,
+        'description': talk.description,
+        'type': talk.type,
+        'startingDate': talk.startingDate,
+        'endingDate': talk.endingDate,
+        'location': talk.location,
+        'speakers': speakers
+    }
+}
+
+function speakerSerializer(speaker) {
+    return {
+        'id': speaker[global.datastore.KEY].id,
+        'firstname': speaker.firstname,
+        'lastname': speaker.lastname,
+        'photo': speaker.photo,
+        'company': speaker.company,
+        'position': speaker.position,
+        'description': speaker.description,
+        'socialMedia': {
+        'linkedIn': speaker.linkedIn
+    }
+    }
+}
+
+
+
 module.exports = {
-    normalizeDate: normalizeDate
+    normalizeDate: normalizeDate,
+    sortTalk: sortTalk,
+    sortByKey: sortByKey,
+    talkSerializer: talkSerializer,
+    speakerSerializer: speakerSerializer
 }

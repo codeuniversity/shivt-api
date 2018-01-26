@@ -3,6 +3,9 @@
 const errors = require( "../util/error_handling" );
 
 function show( req, res ) {
+
+    // TODO: Return ticketHash based on user access code
+
     global.datastore.get( global.datastore.key( [ "Event", parseInt( req.params.eventId ) ] ) )
         .then( ( results ) => {
             res.json( { "status": "OK",
