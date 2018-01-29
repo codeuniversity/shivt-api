@@ -4,36 +4,9 @@ const errors = require('../util/error_handling');
 const helpers = require('../util/helpers');
 
 function index(req, res) {
-    const query = global.datastore.createQuery('Talk').hasAncestor(datastore.key(['Event', parseInt(req.params.eventId)]));
-    global.datastore.runQuery(query, (err, entities) => {
-        if(err) {
-            errors.handle(err, res);
-        }
-        let downloadedTalks = 0;
-        const talks = [];
-        entities.forEach((talk) => {
-            const speakers = [];
-            global.datastore.runQuery(global.datastore.createQuery('_TalkSpeaker').filter('talk', '=', talk[global.datastore.KEY]), (err, result_keys) => {
-                if(err) {
-                    errors.handle(err, res);
-                }
-                result_keys.forEach((result_key) => {
-                        speakers.push(result_key.speaker.id);
-                            if(speakers.length === result_keys.length) {
-                                    helpers.sortTalk(talks, helpers.talkSerializer(talk, speakers))
-                                    downloadedTalks++;
-                                if(downloadedTalks === entities.length) {
-                                    talks.forEach(function (day) {
-                                        helpers.sortByKey(day.talks, 'startingDate');
-                                    })
-                                    helpers.sortByKey(talks, 'date');
-                                    res.json({'status': 'OK', 'talks': talks})
-                                }
-                            }
-                    });
-                });
-            });
-        });
+    getTalks(req.params.eventId, (talks) => {
+        res.json({'status': 'OK', 'talks': talks});
+    })
     }
 
 function show(req, res) {
@@ -60,7 +33,38 @@ function show(req, res) {
         });
     }
 
+    function getTalks(eventId, callback) {
+        const query = global.datastore.createQuery('Talk').hasAncestor(datastore.key(['Event', parseInt(eventId)]));
+        global.datastore.runQuery(query, (err, entities) => {
+            if(err) {
+                errors.handle(err, res);
+            }
+            let downloadedTalks = 0;
+            const talks = [];
+            entities.forEach((talk) => {
+                const speakers = [];
+                global.datastore.runQuery(global.datastore.createQuery('_TalkSpeaker').filter('talk', '=', talk[global.datastore.KEY]), (err, result_keys) => {
+                    result_keys.forEach((result_key) => {
+                        speakers.push(result_key.speaker.id);
+                        if(speakers.length === result_keys.length) {
+                            helpers.sortTalk(talks, helpers.talkSerializer(talk, speakers))
+                            downloadedTalks++;
+                            if(downloadedTalks === entities.length) {
+                                talks.forEach(function (day) {
+                                    helpers.sortByKey(day.talks, 'startingDate');
+                                })
+                                helpers.sortByKey(talks, 'date');
+                                callback(talks);
+                            }
+                        }
+                    });
+                });
+            });
+        });
+    }
+
     module.exports = {
         index: index,
-        show: show
+        show: show,
+        getTalks: getTalks
     };
