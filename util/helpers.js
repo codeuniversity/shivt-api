@@ -59,6 +59,22 @@ function speakerSerializer(speaker) {
     }
 }
 
+function sponsorRankSerializer(sponsorRank) {
+  return {
+    'id': sponsorRank[global.datastore.KEY].id,
+    'name': sponsorRank.name,
+    'order': sponsorRank.order
+  }
+}
+
+function sponsorSerializer(sponsor) {
+  return {
+    'id': sponsor[global.datastore.KEY].id,
+    'name': sponsor.name,
+    'description': sponsor.description
+  }
+}
+
 
 
 module.exports = {
@@ -66,5 +82,7 @@ module.exports = {
     sortTalk: sortTalk,
     sortByKey: sortByKey,
     talkSerializer: talkSerializer,
-    speakerSerializer: speakerSerializer
+    speakerSerializer: speakerSerializer,
+    sponsorRankSerializer: sponsorRankSerializer,
+    sponsorSerializer: sponsorSerializer
 }

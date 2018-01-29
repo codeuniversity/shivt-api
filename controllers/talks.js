@@ -3,12 +3,6 @@
 const errors = require('../util/error_handling');
 const helpers = require('../util/helpers');
 
-function index(req, res) {
-    getTalks(req.params.eventId, (talks) => {
-        res.json({'status': 'OK', 'talks': talks});
-    })
-    }
-
 function show(req, res) {
 
     // IMPORTANT: In case the requested ID has an ancestor, datastore.key takes four parameters.
@@ -64,7 +58,6 @@ function show(req, res) {
     }
 
     module.exports = {
-        index: index,
         show: show,
         getTalks: getTalks
     };

@@ -1,21 +1,18 @@
-"use strict"
+'use strict'
 
-const errors = require("../util/error_handling")
-const helpers = require("../util/helpers")
+const errors = require('../util/error_handling')
+const helpers = require('../util/helpers')
 
-function index(req, res) {
-    const query = global.datastore.createQuery('Attendee').filter('type', '=', 1).hasAncestor(datastore.key(['Event', parseInt(req.params.eventId)]))
+function getSpeakers(eventId, callback) {
+    const query = global.datastore.createQuery('Attendee').filter('type', '=', 1).hasAncestor(datastore.key(['Event', parseInt(eventId)]))
     global.datastore.runQuery(query, (err, entities) => {
-        if (err) {
-            errors.handle(err, res)
-        }
         let speakers = []
         entities.forEach(function (speaker) {
-            console.log(speaker[global.datastore.KEY]);
             speakers.push(helpers.speakerSerializer(speaker))
             if (speakers.length === entities.length) {
                 helpers.sortByKey(speakers,'lastname')
-                res.json({'status': 'OK', 'speakers': speakers})
+                callback(speakers)
+                //res.json({'status': 'OK', 'speakers': speakers})
             }
         })
     })
@@ -36,6 +33,6 @@ function show(req, res) {
 }
 
 module.exports = {
-    index: index,
+    getSpeakers: getSpeakers,
     show: show
 };
