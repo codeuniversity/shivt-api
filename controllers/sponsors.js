@@ -9,12 +9,12 @@ function getSponsors(eventId, callback) {
   global.datastore.runQuery(query, (err, entities) => {
     entities.forEach((sponsorRank) => {
       sponsorRankArray.push(helpers.sponsorRankSerializer(sponsorRank));
-      console.log(sponsorRank[global.datastore.KEY])
-        global.datastore.runQuery(global.datastore.createQuery('Sponsor').filter('rankId', '=', global.datastore.key(['Event', parseInt(eventId), 'SponsorRank', parseInt(sponsorRank[global.datastore.KEY].id)])), (err, entitiesSponsor) => {
-          console.log(entitiesSponsor)
-        entitiesSponsor.forEach((sponsor) => {
-            sponsorRankArray[sponsorRankArray.length-1]['sponsors'] = helpers.sponsorSerializer(sponsor)
-              if (sponsorRankArray.length === entities.length) {
+        global.datastore.runQuery(global.datastore.createQuery('Sponsor').filter('rank', '=', sponsorRank[global.datastore.KEY]), (err, entitiesSponsor) => {
+          entitiesSponsor.forEach((sponsor, index) => {
+            console.log(index,entitiesSponsor.length-1)
+            sponsorRankArray[sponsorRankArray.length-1]['sponsors'][index] = helpers.sponsorSerializer(sponsor)
+            console.log(sponsorRankArray)
+              if (sponsorRankArray.length === entities.length && index === (entitiesSponsor.length-1)) {
                 callback(sponsorRankArray)
               }
             })
