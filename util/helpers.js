@@ -71,7 +71,9 @@ function sponsorSerializer(sponsor) {
   return {
     'id': sponsor[global.datastore.KEY].id,
     'name': sponsor.name,
-    'description': sponsor.description
+    'description': sponsor.description,
+    'logo': sponsor.logo,
+    'order': sponsor.order
   }
 }
 

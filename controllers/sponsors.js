@@ -8,17 +8,19 @@ function getSponsors(eventId, callback) {
   var sponsorRankArray = []
   global.datastore.runQuery(query, (err, entities) => {
     entities.forEach((sponsorRank) => {
-      sponsorRankArray.push(helpers.sponsorRankSerializer(sponsorRank));
-        global.datastore.runQuery(global.datastore.createQuery('Sponsor').filter('rank', '=', sponsorRank[global.datastore.KEY]), (err, entitiesSponsor) => {
-          entitiesSponsor.forEach((sponsor, index) => {
-            console.log(index,entitiesSponsor.length-1)
-            sponsorRankArray[sponsorRankArray.length-1]['sponsors'][index] = helpers.sponsorSerializer(sponsor)
-            console.log(sponsorRankArray)
-              if (sponsorRankArray.length === entities.length && index === (entitiesSponsor.length-1)) {
+      var sponsorRankTemp = helpers.sponsorRankSerializer(sponsorRank)
+      sponsorRankTemp['sponsor'] = []
+      global.datastore.runQuery(global.datastore.createQuery('Sponsor').filter('rank', '=', sponsorRank[global.datastore.KEY]), (err, entitiesSponsor) => {
+        entitiesSponsor.forEach((sponsor, index) => {
+          sponsorRankTemp['sponsor'].push(helpers.sponsorSerializer(sponsor))
+          if(index === (entitiesSponsor.length-1)){
+            sponsorRankArray.push(sponsorRankTemp)
+            if (sponsorRankArray.length === entities.length) {
                 callback(sponsorRankArray)
-              }
-            })
+            }
+          }
         })
+      })
     })
   })
 }

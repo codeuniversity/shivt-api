@@ -11,7 +11,7 @@ const downloadRoutes = require( "./download" );
 
 router.get( "/", ( req, res ) => {
     res.send( "Welcome to this awesome API!" );
-} );
+});
 
 router.use( "/events", eventsRoutes );
 router.use( "/events/:eventId/talks", talksRoutes );

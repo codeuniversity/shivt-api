@@ -31,7 +31,7 @@ function show(req, res) {
         const query = global.datastore.createQuery('Talk').hasAncestor(datastore.key(['Event', parseInt(eventId)]));
         global.datastore.runQuery(query, (err, entities) => {
             if(err) {
-                errors.handle(err, res);
+                errors.handle(err, entities);
             }
             let downloadedTalks = 0;
             const talks = [];
