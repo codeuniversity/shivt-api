@@ -77,6 +77,13 @@ function sponsorSerializer(sponsor) {
   }
 }
 
+function userSerializer(user) {
+  return {
+    'id': user[0][global.datastore.KEY].id,
+    'type': user[0].type
+  }
+}
+
 
 
 module.exports = {
@@ -86,5 +93,6 @@ module.exports = {
     talkSerializer: talkSerializer,
     speakerSerializer: speakerSerializer,
     sponsorRankSerializer: sponsorRankSerializer,
-    sponsorSerializer: sponsorSerializer
+    sponsorSerializer: sponsorSerializer,
+    userSerializer: userSerializer
 }
