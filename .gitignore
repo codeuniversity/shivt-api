@@ -2,3 +2,5 @@
 /node_modules
 keyfile.json
 package-lock.json
+token_privat.key
+token_public.pem

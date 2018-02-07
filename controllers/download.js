@@ -12,7 +12,7 @@ function index( req, res ) {
       speakersController.getSpeakers(req.params.eventId, (speakers) => {
         eventsController.show(req.params.eventId, (event) => {
           sponsorsController.getSponsors(req.params.eventId, (sponsors) => {
-            res.json({'status': 'OK', 'event': event, 'talks': talks, 'speakers': speakers, 'sponsors': sponsors})
+            res.json({'status': true, 'event': event, 'talks': talks, 'speakers': speakers, 'sponsors': sponsors})
           })
         })
       })

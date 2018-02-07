@@ -16,7 +16,7 @@ function getSponsors(eventId, callback) {
           if(index === (entitiesSponsor.length-1)){
             sponsorRankArray.push(sponsorRankTemp)
             if (sponsorRankArray.length === entities.length) {
-                callback(sponsorRankArray)
+              callback(sponsorRankArray)
             }
           }
         })
