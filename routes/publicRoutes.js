@@ -4,6 +4,7 @@ const express = require( 'express' )
 const router = express.Router()
 
 const loginRoutes = require( './public/login' )
+const signupRoutes = require( './public/signup' )
 const eventsRoutes = require( './public/events' )
 const talksRoutes = require( './public/talks' )
 const speakersRoutes = require( './public/speakers' )
@@ -15,6 +16,7 @@ router.get( '/', ( req, res ) => {
 })
 
 router.use( '/login', loginRoutes )
+router.use( '/signup', signupRoutes )
 router.use( '/events', eventsRoutes )
 router.use( '/events/:eventId/talks', talksRoutes )
 router.use( '/events/:eventId/speakers', speakersRoutes )
