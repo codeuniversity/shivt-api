@@ -1,6 +1,6 @@
 const log = require('../util/log')
 
-function output(code, message){
+function output(code, message, res){
   res.json(getErrorJSON(code, message))
 }
 

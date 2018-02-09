@@ -20,11 +20,11 @@ function login (req, res) {
           }, cert, {algorithm: config.get('token.algorithm'), expiresIn: config.get('token.expires')})
           res.json({'status': true, 'token': token})
         } else {
-          errors.output('wrong_password', 'wrong password provided')
+          errors.output('wrong_password', 'wrong password provided', res)
         }
       })
     } else {
-      errors.output('user_not_found', 'user not found')
+      errors.output('user_not_found', 'user not found', res)
     }
   })
 }

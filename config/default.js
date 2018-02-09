@@ -10,6 +10,9 @@ module.exports = {
     expires: '1h',
     algorithm: 'RS256'
   },
+  bcrypt: {
+    saltRounds: 9
+  },
   log: {
     prefix: 'api:'
   },
