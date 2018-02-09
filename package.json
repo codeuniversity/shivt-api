@@ -9,7 +9,7 @@
     "dev": "better-npm-run dev",
     "lint": "eslint .",
     "test": "npm run lint && better-npm-run test",
-    "test": "better-npm-run test",
+    "test-cli": "better-npm-run test",
     "coverage": "better-npm-run coverage"
   },
   "betterScripts": {
