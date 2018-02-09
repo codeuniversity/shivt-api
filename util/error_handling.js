@@ -1,20 +1,29 @@
-function handle(err, res) {
+const log = require('../util/log')
 
-    res.status(500);
-    if(err.name === 'TypeError' && err.message.indexOf('Cannot read property') !== -1 && err.message.indexOf('of undefined') !==  -1) {
-        res.json(getErrorJSON('The requested object does not exist in the database.'));
-    }
-    else {
-        res.json(getErrorJSON('An unknown error occurred.'));
-    }
-    console.log("MESSAGE: "+err);
+function output(code, message){
+  res.json(getErrorJSON(code, message))
 }
 
-function getErrorJSON(message) {
-    console.log('ERROR: '+message);
-    return {'status': 'error', 'message': message};
+function handle (err, res) {
+  if (err) {
+    res.status(500)
+    if (err.name === 'TypeError' && err.message.indexOf('Cannot read property') !== -1 && err.message.indexOf('of undefined') !== -1) {
+      res.json(getErrorJSON('object_not_exist', 'The requested object does not exist in the database.'))
+    }
+    else {
+      res.json(getErrorJSON('unkown_error', 'An unknown error occurred.'))
+    }
+    log.error(err)
+  }
+}
+
+function getErrorJSON (code, message) {
+  log.error(message)
+  return {'status': 'error', 'code': code, 'message': message}
 }
 
 module.exports = {
-    handle: handle
+  handle: handle,
+  output: output,
+  getErrorJSON: getErrorJSON
 }

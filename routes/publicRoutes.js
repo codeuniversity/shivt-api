@@ -1,25 +1,25 @@
-'use strict';
+'use strict'
 
-const express = require( 'express' );
-const router = express.Router();
+const express = require( 'express' )
+const router = express.Router()
 
-const loginRoutes = require( './login' );
-const eventsRoutes = require( './events' );
-const talksRoutes = require( './talks' );
-const speakersRoutes = require( './speakers' );
-const sponsorsRoutes = require( './sponsors' );
-const downloadRoutes = require( './download' );
+const loginRoutes = require( './public/login' )
+const eventsRoutes = require( './public/events' )
+const talksRoutes = require( './public/talks' )
+const speakersRoutes = require( './public/speakers' )
+const sponsorsRoutes = require( './public/sponsors' )
+const downloadRoutes = require( './public/download' )
 
 router.get( '/', ( req, res ) => {
-    res.send( 'Welcome to this awesome API!' );
-});
+    res.send( 'Welcome to this awesome API!' )
+})
 
-router.use( '/login', loginRoutes );
-router.use( '/events', eventsRoutes );
-router.use( '/events/:eventId/talks', talksRoutes );
-router.use( '/events/:eventId/speakers', speakersRoutes );
-router.use( '/events/:eventId/sponsors', sponsorsRoutes );
+router.use( '/login', loginRoutes )
+router.use( '/events', eventsRoutes )
+router.use( '/events/:eventId/talks', talksRoutes )
+router.use( '/events/:eventId/speakers', speakersRoutes )
+router.use( '/events/:eventId/sponsors', sponsorsRoutes )
 
-router.use( '/events/:eventId/download', downloadRoutes );
+router.use( '/events/:eventId/download', downloadRoutes )
 
-module.exports = router;
+module.exports = router
