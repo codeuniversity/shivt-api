@@ -1,6 +1,6 @@
 /.idea
 /node_modules
-keyfile.json
 package-lock.json
-token_privat.key
-token_public.pem
+/config/keyfile.json
+/config/token_privat.key
+/config/token_public.pem
