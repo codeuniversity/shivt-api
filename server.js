@@ -4,7 +4,6 @@ const app = express()
 const port = process.env.PORT || 3000
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
-const fs = require('fs')
 const config = require('config')
 const ev = require('express-validation')
 
@@ -20,7 +19,7 @@ global.datastore = require('@google-cloud/datastore')({
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 
-// Logging (debug only).
+// Logging (debug only)
 app.use(morgan('combined', {stream: {write: msg => log.info(msg)}}))
 
 // Routes
