@@ -32,12 +32,34 @@ function create (req, res) {
     }
   }
   global.datastore.insert(entity).then((results) => {
-    console.log(results)
     res.json({'status': true, 'projectId': results[0].mutationResults[0].key.path[0].id})
+  })
+}
+
+function update (req, res) {
+  global.datastore.get(global.datastore.key(['Event', parseInt(req.body.id)])) .then((event) => {
+    if(event[0]){
+      const entity = {
+        key: global.datastore.key(['Event', parseInt(req.body.id)]),
+        data: {
+          name: req.body.name,
+          description: req.body.description,
+          location: req.body.location,
+          startingDate: new Date(req.body.startingDate),
+          endingDate: new Date(req.body.endingDate)
+        }
+      }
+      global.datastore.update(entity).then(() => {
+        res.json({'status': true})
+      })
+    }else{
+      errors.output('event_not_exist', 'event does not exist', res)
+    }
   })
 }
 
 module.exports = {
   'show': show,
-  'create': create
+  'create': create,
+  'update': update
 }

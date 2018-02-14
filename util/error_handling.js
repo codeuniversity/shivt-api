@@ -11,7 +11,7 @@ function handle (err, res) {
       res.json(getErrorJSON('object_not_exist', 'The requested object does not exist in the database.'))
     }
     else {
-      res.json(getErrorJSON('unkown_error', 'An unknown error occurred.'))
+      res.json(getErrorJSON('unkown_error', err))
     }
     log.error(err)
   }
