@@ -16,4 +16,8 @@ module.exports = {
   log: {
     prefix: 'api:'
   },
+  mailgun: {
+    key: 'key-f4dbeb86623261dff6f14d14800dc251',
+    domain: 'unicode.berlin'
+  }
 }

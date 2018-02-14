@@ -2,6 +2,9 @@
 
 const config = require('config')
 const bcrypt = require('bcrypt')
+const fs = require('fs')
+const mailgun = require('mailgun-js')({apiKey: config.get('mailgun.key'), domain: config.get('mailgun.domain')})
+
 
 const errors = require('../util/error_handling')
 const helpers = require('../util/helpers')
@@ -17,6 +20,8 @@ function signup (req, res) {
           const entity = {
             key: global.datastore.key('User'),
             data: {
+              active: 0,
+              name: req.body.name,
               mail: req.body.mail,
               password: passwordHash,
               type: 0,
@@ -24,7 +29,18 @@ function signup (req, res) {
             }
           }
           global.datastore.insert(entity).then(() => {
-            res.json({'status': true})
+            let html = fs.readFileSync('mail/signup.html', 'utf8')
+              .replace('{name}', req.body.name)
+              .replace('{link}', 'http://localhost:3000/api/v1/signup/activate/'+Buffer.from(hash).toString('base64'))
+            let data = {
+              from: 'Shivt Team <no-reply@unicode.berlin>',
+              to: req.body.mail,
+              subject: 'Shivt: Activate your account',
+              html: html
+            }
+            mailgun.messages().send(data, function (error, body) {
+              res.json({'status': true})
+            })
           })
         })
       })
