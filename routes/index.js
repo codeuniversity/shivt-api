@@ -17,14 +17,10 @@ router.use((req, res, next) => {
     jwt.verify(token, cert, {algorithm: ['RS256']}, (err, decod) => {
       if (err) {
         if (err.name == 'TokenExpiredError') {
-          res.status(403).json({
-            message: 'Token expired'
-          })
+          errors.output('token_expired', 'token expired', res)
         }
         else {
-          res.status(403).json({
-            message: 'Wrong Token'
-          })
+          errors.output('wrong_token', 'wrong token', res)
         }
       }
       else {
@@ -34,9 +30,7 @@ router.use((req, res, next) => {
     })
   }
   else {
-    res.status(403).json({
-      message: 'No Token'
-    })
+    errors.output('no_token', 'no token provided', res)
   }
 })
 router.use('/api/v1', privatRoutes)
