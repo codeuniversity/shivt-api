@@ -9,4 +9,4 @@ module.exports = {
     startingDate: Joi.date().required(),
     endingDate: Joi.date().required()
   }
-};
+}
