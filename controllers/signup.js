@@ -46,9 +46,33 @@ function signup (req, res) {
       })
     }
   })
-
 }
 
+function activate (req, res) {
+  const query = global.datastore.createQuery('User').filter('hash', '=', req.params.hash)
+  global.datastore.runQuery(query, (err, user) => {
+    if(user[0]){
+      if(user[0].active!=1){
+        user[0].active = 1
+        user[0].hash = ''
+        const entity = {
+          key: user[0][global.datastore.KEY],
+          data: user[0]
+        }
+        global.datastore.save(entity).then(() => {
+          res.json({'status': true})
+        })
+      }else{
+        errors.output('user_already_activated', 'user already activated', res)
+      }
+    }else{
+      errors.output('user_not_exist', 'user does not exist', res)
+    }
+  })
+}
+
+
 module.exports = {
-  'signup': signup
+  'signup': signup,
+  'activate': activate
 }

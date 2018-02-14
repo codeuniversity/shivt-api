@@ -9,5 +9,6 @@ const signup = require('../../validation/signup')
 let router = express.Router()
 
 router.post('/', validate(signup), signupController.signup)
+router.get('/activate/:hash', signupController.activate)
 
 module.exports = router
