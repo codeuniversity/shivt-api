@@ -3,9 +3,6 @@
 const errors = require('../util/error_handling')
 
 function show (eventId, callback) {
-
-  // TODO: Return ticketHash based on user access code
-
   global.datastore.get(global.datastore.key(['Event', parseInt(eventId)]))
     .then((results) => {
       callback({
@@ -23,6 +20,24 @@ function show (eventId, callback) {
   })
 }
 
+function create (req, res) {
+  const entity = {
+    key: global.datastore.key('Event'),
+    data: {
+      name: req.body.name,
+      description: req.body.description,
+      location: req.body.location,
+      startingDate: new Date(req.body.startingDate),
+      endingDate: new Date(req.body.endingDate)
+    }
+  }
+  global.datastore.insert(entity).then((results) => {
+    console.log(results)
+    res.json({'status': true, 'projectId': results[0].mutationResults[0].key.path[0].id})
+  })
+}
+
 module.exports = {
-  'show': show
+  'show': show,
+  'create': create
 }
