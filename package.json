@@ -14,7 +14,7 @@
   },
   "betterScripts": {
     "dev": {
-      "command": "nodemon src/server.js",
+      "command": "nodemon server.js",
       "env": {
         "NODE_ENV": "development",
         "PORT": 3000,
