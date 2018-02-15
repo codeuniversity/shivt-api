@@ -4,3 +4,5 @@ package-lock.json
 /config/keyfile.json
 /config/token_privat.key
 /config/token_public.pem
+
+*.jar
