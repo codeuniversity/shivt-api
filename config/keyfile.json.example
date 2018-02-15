@@ -1,7 +1,7 @@
 {
   "type": "service_account",
   "project_id": "PROJECTID",
-  "private_key_id": "e6fe38f194b0d56cf9f7183450b6cef02783c29b",
+  "private_key_id": "KEY_ID",
   "private_key": ""
   "client_email": "CLIENTMAIL",
   "client_id": "CLIENTID",
