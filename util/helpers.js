@@ -5,32 +5,46 @@ function normalizeDate (date) {
   return date
 }
 
-function sortTalk (talks, talk) {
+function sortByDay (talks, talk, key_name) {
   let found = false
   for (let i = 0; i < talks.length; i++) {
     if (normalizeDate(new Date(talk.startingDate)).toISOString() === talks[i].date) {
-      talks[i].talks.push(talk)
+      talks[i][key_name].push(talk)
       found = true
       break
     }
   }
   if (!found) {
-    talks.push({
-      'date': normalizeDate(new Date(talk.startingDate)).toISOString(),
-      'talks': [
-        talk
-      ]
-    })
+    let object = {}
+    object['date'] = normalizeDate(new Date(talk.startingDate)).toISOString()
+    object[key_name] = [talk]
+    talks.push(object)
   }
 }
 
 function sortByKey (array, key) {
   return array.sort(function (a, b) {
-    var x = a[key]
-    var y = b[key]
+    let x = a[key]
+    let y = b[key]
     return ((x < y) ? -1 : ((x > y) ? 1 : 0))
   })
 }
+
+function findInRelationalEntity(sourceKey, entityName, callback) {
+  global.datastore.runQuery(global.datastore.createQuery(entityName).filter(sourceKey.kind.toLowerCase(), '=', sourceKey), (err, targetKeys) => {
+    if(err) {
+      console.log(err)
+    }
+    let targetKey = Object.keys(targetKeys[0]);
+    targetKey.splice(targetKey.indexOf(sourceKey.kind.toLowerCase()), 1)
+    global.datastore.get(targetKeys.map(obj => obj[targetKey[0]]), (err, targetEntities) => {
+      if(err)
+        console.log(err)
+      callback(targetEntities)
+    })
+  })
+
+  }
 
 function talkSerializer (talk, speakers) {
   return {
@@ -85,13 +99,45 @@ function userSerializer (user) {
   }
 }
 
+function shiftSerializer (shift, skills, contact) {
+  return {
+    'name': shift.name,
+    'description': shift.description,
+    'startingDate': shift.startingDate,
+    'endingDate': shift.endingDate,
+    'requiredSkills': skills,
+    'preferredGender': shift.preferredGender,
+    'meetingPoint': shift.meetingPoint,
+    'contact': contact
+  }
+}
+
+function skillSerializer (skill) {
+  return {
+    'id': skill[global.datastore.KEY].id,
+    'name': skill.name
+  }
+}
+
+function contactSerializer (contact) {
+  return {
+    'id': contact[global.datastore.KEY].id,
+    'name': contact.name,
+    'phone': contact.phone,
+    'mail': contact.mail
+  }
+}
+
 module.exports = {
-  normalizeDate: normalizeDate,
-  sortTalk: sortTalk,
+  sortByDay: sortByDay,
   sortByKey: sortByKey,
+  findInRelationalEntity: findInRelationalEntity,
   talkSerializer: talkSerializer,
   speakerSerializer: speakerSerializer,
   sponsorRankSerializer: sponsorRankSerializer,
   sponsorSerializer: sponsorSerializer,
-  userSerializer: userSerializer
+  userSerializer: userSerializer,
+  shiftSerializer: shiftSerializer,
+  skillSerializer: skillSerializer,
+  contactSerializer: contactSerializer
 }

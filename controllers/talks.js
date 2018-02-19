@@ -41,7 +41,7 @@ function show(req, res) {
                     result_keys.forEach((result_key) => {
                         speakers.push(result_key.speaker.id);
                         if(speakers.length === result_keys.length) {
-                            helpers.sortTalk(talks, helpers.talkSerializer(talk, speakers))
+                            helpers.sortByDay(talks, helpers.talkSerializer(talk, speakers), 'talks')
                             downloadedTalks++;
                             if(downloadedTalks === entities.length) {
                                 talks.forEach(function (day) {
