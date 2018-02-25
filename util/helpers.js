@@ -23,11 +23,15 @@ function sortByDay (talks, talk, key_name) {
 }
 
 function sortByKey (array, key) {
-  return array.sort(function (a, b) {
-    let x = a[key]
-    let y = b[key]
-    return ((x < y) ? -1 : ((x > y) ? 1 : 0))
-  })
+  if(array.length > 0) {
+    return array.sort(function (a, b) {
+      let x = a[key]
+      let y = b[key]
+      return ((x < y) ? -1 : ((x > y) ? 1 : 0))
+    })
+  } else {
+    return []
+  }
 }
 
 function findInRelationalEntity(sourceKey, entityName, callback) {
@@ -35,14 +39,57 @@ function findInRelationalEntity(sourceKey, entityName, callback) {
     if(err) {
       console.log(err)
     }
-    let targetKey = Object.keys(targetKeys[0]);
-    targetKey.splice(targetKey.indexOf(sourceKey.kind.toLowerCase()), 1)
-    global.datastore.get(targetKeys.map(obj => obj[targetKey[0]]), (err, targetEntities) => {
-      if(err)
-        console.log(err)
-      callback(targetEntities)
-    })
+    if(targetKeys.length !== 0) {
+      let targetKey = Object.keys(targetKeys[0]);
+      targetKey.splice(targetKey.indexOf(sourceKey.kind.toLowerCase()), 1)
+      global.datastore.get(targetKeys.map(obj => obj[targetKey[0]]), (err, targetEntities) => {
+        if (err)
+          console.log(err)
+        callback(targetEntities)
+      })
+    } else {
+      callback([])
+    }
   })
+
+  }
+
+  function insertRelation(entityType, firstKey, secondKey, res, callback) {
+
+    const errors = require('../util/error_handling');
+
+    global.datastore.runQuery(global.datastore.createQuery(entityType)
+        .filter(firstKey.kind.toLowerCase(), firstKey)
+        .filter(secondKey.kind.toLowerCase(), secondKey),
+      (err, exists) => {
+        console.log(exists)
+        if (exists.length !== 0) {
+          errors.output('relation_already_exist', 'relation does already exist', res)
+        } else {
+          global.datastore.get(firstKey, (err, first) => {
+            if (first === undefined) {
+              errors.output(firstKey.kind.toLowerCase()+'_not_exist', firstKey.kind.toLowerCase()+' does not exist', res)
+            } else {
+              global.datastore.get(secondKey, (err, second) => {
+                if (second === undefined) {
+                  errors.output(secondKey.kind.toLowerCase()+'_not_exist', secondKey.kind.toLowerCase()+' does not exist', res)
+                } else {
+                  entityData = {}
+                  entityData[firstKey.kind.toLowerCase()] = firstKey
+                  entityData[secondKey.kind.toLowerCase()] = secondKey
+                  const entity = {
+                    key: global.datastore.key(['Event', parseInt(firstKey.parent.id), entityType]),
+                    data: entityData
+                  }
+                  global.datastore.insert(entity).then((results) => {
+                    callback(true)
+                  })
+                }
+              })
+            }
+          })
+        }
+      })
 
   }
 
@@ -99,8 +146,22 @@ function userSerializer (user) {
   }
 }
 
+function employeeSerializer (employee, skills) {
+  return {
+    'id': employee[global.datastore.KEY].id,
+    'firstname': employee.firstname,
+    'lastname': employee.lastname,
+    'gender': employee.gender,
+    'email': employee.email,
+    'phone': employee.phone,
+    'skills': skills,
+    'inviteCode': employee.inviteCode,
+  }
+}
+
 function shiftSerializer (shift, skills, contact) {
   return {
+    'id': shift[global.datastore.KEY].id,
     'name': shift.name,
     'description': shift.description,
     'startingDate': shift.startingDate,
@@ -122,9 +183,10 @@ function skillSerializer (skill) {
 function contactSerializer (contact) {
   return {
     'id': contact[global.datastore.KEY].id,
-    'name': contact.name,
+    'firstname': contact.firstname,
+    'lastname': contact.lastname,
     'phone': contact.phone,
-    'mail': contact.mail
+    'email': contact.email
   }
 }
 
@@ -137,7 +199,9 @@ module.exports = {
   sponsorRankSerializer: sponsorRankSerializer,
   sponsorSerializer: sponsorSerializer,
   userSerializer: userSerializer,
+  employeeSerializer: employeeSerializer,
   shiftSerializer: shiftSerializer,
   skillSerializer: skillSerializer,
-  contactSerializer: contactSerializer
+  contactSerializer: contactSerializer,
+  insertRelation: insertRelation
 }

@@ -5,11 +5,18 @@ const validate = require('express-validation')
 
 const employeeController = require('../../controllers/employees')
 const employeeCreateValidate = require('../../validation/employees/create')
-const employeeUpdateValidate = require('../../validation/employees/update')
 
 let router = express.Router({mergeParams: true})
 
-router.post('/create', validate(employeeCreateValidate), employeeController.create)
-router.post('/update', validate(employeeUpdateValidate), employeeController.update)
+router.get('/', employeeController.index)
+router.get('/:employeeId', employeeController.show)
+router.post('/', validate(employeeCreateValidate), employeeController.create)
+router.put('/:employeeId', validate(employeeCreateValidate), employeeController.update)
+router.delete('/:employeeId', employeeController.remove)
+router.post('/:employeeId/skills/:skillId', employeeController.addSkill)
+router.delete('/:employeeId/skills/:skillId', employeeController.removeSkill)
+router.post('/:employeeId/shifts/:shiftId', employeeController.addShift)
+router.delete('/:employeeId/shifts/:shiftId', employeeController.removeShift)
+router.get('/:employeeId/shifts/', employeeController.getShifts)
 
 module.exports = router

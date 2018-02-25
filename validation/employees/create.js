@@ -2,9 +2,10 @@ const Joi = require('joi')
 
 module.exports = {
   body: {
-    name: Joi.string().max(50).required(),
-    gender: Joi.number().integer().max(3),
-    mail: Joi.string().email(),
+    firstname: Joi.string().max(50).required(),
+    lastname: Joi.string().max(50).required(),
+    gender: Joi.string().valid(['MALE', 'FEMALE']),
+    email: Joi.string().email(),
     phone: Joi.string().max(30),
   }
 }
