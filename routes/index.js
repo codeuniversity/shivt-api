@@ -6,8 +6,8 @@ const fs = require('fs')
 const config = require('config')
 
 const errors = require('../util/error_handling')
-const publicRoutes = require('./publicRoutes')
-const privatRoutes = require('./privatRoutes')
+const publicRoutes = require('./public_routes')
+const privatRoutes = require('./private_routes')
 
 router.use('/api/v1', publicRoutes)
 router.use((req, res, next) => {
