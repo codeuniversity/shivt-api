@@ -4,6 +4,9 @@ const helpers = require("../util/helpers")
 const errors = require('../util/error_handling');
 const randomstring = require("randomstring")
 const interchangeable_routes = require("../util/interchangeable_routes")
+const fs = require('fs')
+const config = require('config')
+const jwt = require('jsonwebtoken')
 
 function index(req, res) {
 
@@ -137,7 +140,7 @@ function getShifts(req, res) {
         shifts.push({
           'id': tmp_shift[global.datastore.KEY].id,
           'name': tmp_shift.name,
-          'description': tmp_shift.description,
+          'meetingPoint': tmp_shift.meetingPoint,
           'startingDate': tmp_shift.startingDate,
           'endingDate': tmp_shift.endingDate,
         })
@@ -146,6 +149,83 @@ function getShifts(req, res) {
     })
 
 }
+
+function login(req, res) {
+
+  global.datastore.runQuery(global.datastore.createQuery('Employee').filter('inviteCode', '=', req.body.inviteCode).limit(1), (err, employee) => {
+    errors.handle(err, res)
+    if (employee.length > 0) {
+      console.log('found')
+            let cert = fs.readFileSync(config.get('token.privat'))
+            let token = jwt.sign({
+              data: employee[0][global.datastore.KEY].id
+            }, cert, {algorithm: config.get('token.algorithm'), expiresIn: config.get('token.expires')})
+            res.json({'status': true, 'id': employee[0][global.datastore.KEY].id, 'token': token})
+    } else {
+      errors.output('employee_not_found', 'employee not found', res)
+    }
+
+  })
+
+}
+
+function getBlockedTimes(req, res) {
+
+  let blockedTimes = []
+
+  helpers.findInRelationalEntity(
+    global.datastore.key(['Event', parseInt(req.params.eventId), 'Employee', parseInt(req.params.employeeId)]),
+    '_BlockedTimesEmployee',
+    (tmp_blockedtimes) => {
+      tmp_blockedtimes.forEach((tmp_blockedtime) => {
+        blockedTimes.push({
+          'id': tmp_blockedtime[global.datastore.KEY].id,
+          'startingDate': tmp_blockedtime.startingDate,
+          'endingDate': tmp_blockedtime.endingDate,
+        })
+      })
+      res.json({'status': true, 'blockedTimes': blockedTimes})
+    })
+
+}
+
+function addBlockedTime(req, res) {
+
+  if(req.decoded === req.params.employeeId) {
+
+    const entity = {
+      key: global.datastore.key(['Event', parseInt(req.params.eventId), 'BlockedTime']),
+      data: {
+        startingDate: new Date(req.body.startingDate),
+        endingDate: new Date(req.body.endingDate),
+      }
+    }
+    global.datastore.insert(entity).then((results) => {
+      res.json({'status': true, 'id': results[0].mutationResults[0].key.path[1].id})
+    })
+
+    interchangeable_routes.addBlockedTimeEmployee(req, res)
+
+  } else {
+
+    errors.output('not_permitted', 'You are not permitted to perform this action', res);
+
+  }
+
+}
+
+function removeBlockedTime(req, res) {
+
+  global.datastore.delete(global.datastore.key(['Event', parseInt(req.params.eventId), 'BlockedTime', parseInt(req.params.blockedTimeId)]), () => {
+    res.json({'status': true})
+  });
+
+  interchangeable_routes.removeBlockedTimeEmployee(req)
+
+  res.json({'status': true})
+
+}
+
 
 function processEmployees(err, tmp_employees, callback) {
   if (!Array.isArray(tmp_employees)) {
@@ -184,5 +264,9 @@ module.exports = {
   removeSkill: removeSkill,
   addShift: addShift,
   removeShift: removeShift,
-  getShifts: getShifts
+  getShifts: getShifts,
+  getBlockedTimes: getBlockedTimes,
+  addBlockedTime: addBlockedTime,
+  removeBlockedTime: removeBlockedTime,
+  login: login
 }

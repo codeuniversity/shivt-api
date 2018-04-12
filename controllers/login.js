@@ -19,7 +19,7 @@ function login (req, res) {
             let token = jwt.sign({
               data: helpers.userSerializer(user),
             }, cert, {algorithm: config.get('token.algorithm'), expiresIn: config.get('token.expires')})
-            res.json({'status': true, 'token': token})
+            res.json({'status': true, 'id': user[0][global.datastore.KEY].id, 'token': token})
           } else {
             errors.output('wrong_password', 'wrong password provided', res)
           }

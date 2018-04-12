@@ -16,7 +16,7 @@ router.use((req, res, next) => {
     let cert = fs.readFileSync(config.get('token.public'))
     jwt.verify(token, cert, {algorithm: ['RS256']}, (err, decod) => {
       if (err) {
-        if (err.name == 'TokenExpiredError') {
+        if (err.name === 'TokenExpiredError') {
           errors.output('token_expired', 'token expired', res)
         }
         else {
@@ -24,13 +24,39 @@ router.use((req, res, next) => {
         }
       }
       else {
-        req.decoded = decod
-        next()
+
+        // Permission management for employees
+
+        if(!isNaN(decod)) {
+          if(((RegExp('/api/v1/events/(.*)/employees/(.*)/shifts').test(req.url) ||
+              RegExp('/api/v1/events/(.*)/shifts').test(req.url) ||
+              RegExp('/api/v1/events/(.*)/shifts/(.*)').test(req.url))
+              && req.method === 'GET') ||
+              RegExp('/api/v1/events/(.*)/employees/(.*)/blocked').test(req.url) ||
+              RegExp('/api/v1/events/(.*)/employees/(.*)/blocked/(.*)').test(req.url)
+              ){
+                console.log('pass')
+                req.decoded = decod
+                next()
+          } else {
+            errors.output('not_permitted', 'this user is not permitted to access the requested function', res)
+          }
+        } else {
+          req.decoded = decod
+          next()
+      }
       }
     })
   }
   else {
-    errors.output('no_token', 'no token provided', res)
+
+    // We want to enable employees to login without a token
+
+    if(!RegExp('/api/v1/events/(.*)/employees/login').test(req.url)) {
+      errors.output('no_token', 'no token provided', res)
+    } else {
+      next()
+    }
   }
 })
 router.use('/api/v1', privatRoutes)
