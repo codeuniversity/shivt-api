@@ -9,8 +9,8 @@ const shiftsRoutes = require('./private/shifts')
 const skillsRoutes = require('./private/skills')
 
 router.use('/events', eventRoutes)
-router.use('/events/:eventId/employees', employeesRoutes)
+router.use('/employees', employeesRoutes)
 router.use( '/events/:eventId/shifts', shiftsRoutes )
-router.use( '/events/:eventId/skills', skillsRoutes )
+router.use( '/skills', skillsRoutes )
 
 module.exports = router

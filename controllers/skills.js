@@ -5,7 +5,7 @@ const errors = require('../util/error_handling');
 
 function index(req, res) {
 
-  global.datastore.runQuery(global.datastore.createQuery('Skill').hasAncestor(datastore.key(['Event', parseInt(req.params.eventId)])), (err, tmp_skills) => {
+  global.datastore.runQuery(global.datastore.createQuery('Skill'), (err, tmp_skills) => {
 
     let skills = []
 
@@ -21,7 +21,7 @@ function index(req, res) {
 
 function show(req, res) {
 
-  global.datastore.get(global.datastore.key(['Event', parseInt(req.params.eventId), 'Skill', parseInt(req.params.skillId)]), (err, tmp_skill) => {
+  global.datastore.get(global.datastore.key(['Skill', parseInt(req.params.skillId)]), (err, tmp_skill) => {
     if(tmp_skill === undefined) {
       errors.output('skill_not_exist', 'skill does not exist', res)
     } else {
@@ -33,7 +33,7 @@ function show(req, res) {
 
 function create(req, res) {
   const entity = {
-    key: global.datastore.key(['Event', parseInt(req.params.eventId), 'Skill']),
+    key: global.datastore.key('Skill'),
     data: {
       name: req.body.name,
     }
@@ -45,7 +45,7 @@ function create(req, res) {
 
 function update(req, res) {
       const entity = {
-        key: global.datastore.key(['Event', parseInt(req.params.eventId), 'Skill', parseInt(req.params.skillId)]),
+        key: global.datastore.key(['Skill', parseInt(req.params.skillId)]),
         data: {
           name: req.body.name,
         }
@@ -61,7 +61,7 @@ function update(req, res) {
 }
 
 function remove(req, res) {
-  global.datastore.delete(global.datastore.key(['Event', parseInt(req.params.eventId), 'Skill', parseInt(req.params.skillId)]), () => {
+  global.datastore.delete(global.datastore.key(['Skill', parseInt(req.params.skillId)]), () => {
     res.json({'status': true})
   });
 }

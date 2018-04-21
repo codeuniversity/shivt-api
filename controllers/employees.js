@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken')
 
 function index(req, res) {
 
-  global.datastore.runQuery(global.datastore.createQuery('Employee').hasAncestor(datastore.key(['Event', parseInt(req.params.eventId)])), (err, tmp_employees) => {
+  global.datastore.runQuery(global.datastore.createQuery('Employee'), (err, tmp_employees) => {
     processEmployees(err, tmp_employees, (employees) => {
       res.json({'status': true, 'employees': employees})
     })
@@ -20,7 +20,7 @@ function index(req, res) {
 
 function show(req, res) {
 
-  global.datastore.get(global.datastore.key(['Event', parseInt(req.params.eventId), 'Employee', parseInt(req.params.employeeId)]), (err, tmp_employee) => {
+  global.datastore.get(global.datastore.key(['Employee', parseInt(req.params.employeeId)]), (err, tmp_employee) => {
     if (tmp_employee === undefined) {
       errors.output('employee_not_exist', 'employee does not exist', res)
     } else {
@@ -38,14 +38,14 @@ function create(req, res) {
     charset: 'alphanumeric'
   })
   const entity = {
-    key: global.datastore.key(['Event', parseInt(req.params.eventId), 'Employee']),
+    key: global.datastore.key('Employee'),
     data: {
       firstname: req.body.firstname,
       lastname: req.body.lastname,
       gender: req.body.gender,
       email: req.body.email,
       phone: req.body.phone,
-      inviteCode: inviteCode
+      inviteCode: inviteCode,
     }
   }
   global.datastore.insert(entity).then((results) => {
@@ -54,12 +54,12 @@ function create(req, res) {
 }
 
 function update(req, res) {
-  global.datastore.get(global.datastore.key(['Event', parseInt(req.params.eventId), 'Employee', parseInt(req.params.employeeId)]), (err, employee) => {
+  global.datastore.get(global.datastore.key(['Employee', parseInt(req.params.employeeId)]), (err, employee) => {
     if (employee === undefined) {
       errors.output('employee_not_exist', 'employee does not exist', res)
     } else {
       const entity = {
-        key: global.datastore.key(['Event', parseInt(req.params.eventId), 'Employee', parseInt(req.params.employeeId)]),
+        key: global.datastore.key(['Employee', parseInt(req.params.employeeId)]),
         data: {
           firstname: req.body.firstname,
           lastname: req.body.lastname,
@@ -82,16 +82,17 @@ function update(req, res) {
 }
 
 function remove(req, res) {
-  global.datastore.delete(global.datastore.key(['Event', parseInt(req.params.eventId), 'Employee', parseInt(req.params.employeeId)]), () => {
+  global.datastore.delete(global.datastore.key(['Employee', parseInt(req.params.employeeId)]), () => {
     res.json({'status': true})
   });
 }
 
 function addSkill(req, res) {
   helpers.insertRelation(
+    false,
     '_EmployeeSkill',
-    global.datastore.key(['Event', parseInt(req.params.eventId), 'Employee', parseInt(req.params.employeeId)]),
-    global.datastore.key(['Event', parseInt(req.params.eventId), 'Skill', parseInt(req.params.skillId)]),
+    global.datastore.key(['Employee', parseInt(req.params.employeeId)]),
+    global.datastore.key(['Skill', parseInt(req.params.skillId)]),
     res,
     (result) => {
       if(result === true) {
@@ -103,13 +104,13 @@ function addSkill(req, res) {
 
 function removeSkill(req, res) {
   global.datastore.runQuery(global.datastore.createQuery('_EmployeeSkill')
-      .filter('employee', global.datastore.key(['Event', parseInt(req.params.eventId), 'Employee', parseInt(req.params.employeeId)]))
-      .filter('skill', global.datastore.key(['Event', parseInt(req.params.eventId), 'Skill', parseInt(req.params.skillId)])),
+      .filter('employee', global.datastore.key(['Employee', parseInt(req.params.employeeId)]))
+      .filter('skill', global.datastore.key(['Skill', parseInt(req.params.skillId)])),
     (err, exists) => {
       if (exists.length === 0) {
         errors.output('relation_not_exist', 'relation does not exist', res)
       } else {
-        global.datastore.delete(global.datastore.key(['Event', parseInt(req.params.eventId), '_EmployeeSkill', parseInt(exists[0][global.datastore.KEY].id)]), () => {
+        global.datastore.delete(global.datastore.key(['_EmployeeSkill', parseInt(exists[0][global.datastore.KEY].id)]), () => {
           res.json({'status': true})
         })
       }
@@ -133,7 +134,7 @@ function getShifts(req, res) {
   let shifts = []
 
   helpers.findInRelationalEntity(
-    global.datastore.key(['Event', parseInt(req.params.eventId), 'Employee', parseInt(req.params.employeeId)]),
+    global.datastore.key(['Employee', parseInt(req.params.employeeId)]),
     '_ShiftEmployee',
     (tmp_shifts) => {
       tmp_shifts.forEach((tmp_shift) => {
@@ -174,7 +175,7 @@ function getBlockedTimes(req, res) {
   let blockedTimes = []
 
   helpers.findInRelationalEntity(
-    global.datastore.key(['Event', parseInt(req.params.eventId), 'Employee', parseInt(req.params.employeeId)]),
+    global.datastore.key(['Employee', parseInt(req.params.employeeId)]),
     '_BlockedTimesEmployee',
     (tmp_blockedtimes) => {
       tmp_blockedtimes.forEach((tmp_blockedtime) => {

@@ -54,7 +54,7 @@ function findInRelationalEntity(sourceKey, entityName, callback) {
 
   }
 
-  function insertRelation(entityType, firstKey, secondKey, res, callback) {
+  function insertRelation(isGlobal, entityType, firstKey, secondKey, res, callback) {
 
     const errors = require('../util/error_handling');
 
@@ -62,14 +62,14 @@ function findInRelationalEntity(sourceKey, entityName, callback) {
         .filter(firstKey.kind.toLowerCase(), firstKey)
         .filter(secondKey.kind.toLowerCase(), secondKey),
       (err, exists) => {
-        console.log(exists)
-        if (exists.length !== 0) {
+        if (exists !== undefined && exists.length !== 0) {
           errors.output('relation_already_exist', 'relation does already exist', res)
         } else {
           global.datastore.get(firstKey, (err, first) => {
             if (first === undefined) {
               errors.output(firstKey.kind.toLowerCase()+'_not_exist', firstKey.kind.toLowerCase()+' does not exist', res)
             } else {
+              console.log(secondKey)
               global.datastore.get(secondKey, (err, second) => {
                 if (second === undefined) {
                   errors.output(secondKey.kind.toLowerCase()+'_not_exist', secondKey.kind.toLowerCase()+' does not exist', res)
@@ -78,7 +78,7 @@ function findInRelationalEntity(sourceKey, entityName, callback) {
                   entityData[firstKey.kind.toLowerCase()] = firstKey
                   entityData[secondKey.kind.toLowerCase()] = secondKey
                   const entity = {
-                    key: global.datastore.key(['Event', parseInt(firstKey.parent.id), entityType]),
+                    key: isGlobal ? global.datastore.key(entityType) : global.datastore.key(['Event', parseInt(firstKey.parent.id), entityType]),
                     data: entityData
                   }
                   global.datastore.insert(entity).then((results) => {

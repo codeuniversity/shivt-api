@@ -40,7 +40,7 @@ function create(req, res) {
       endingDate: new Date(req.body.endingDate),
       preferredGender: req.body.preferredGender,
       meetingPoint: req.body.meetingPoint,
-      contactId: global.datastore.key(['Event', parseInt(req.params.eventId), 'Employee', parseInt(req.body.contactId)])
+      contactId: global.datastore.key(['Employee', parseInt(req.body.contactId)])
     }
   }
   global.datastore.insert(entity).then((results) => {
@@ -58,7 +58,7 @@ function update(req, res) {
       endingDate: new Date(req.body.endingDate),
       preferredGender: req.body.preferredGender,
       meetingPoint: req.body.meetingPoint,
-      contactId: global.datastore.key(['Event', parseInt(req.params.eventId), 'Employee', parseInt(req.body.contactId)])
+      contactId: global.datastore.key(['Employee', parseInt(req.body.contactId)])
     }
   }
   global.datastore.update(entity, (err) => {
@@ -79,9 +79,10 @@ function remove(req, res) {
 
 function addSkill(req, res) {
   helpers.insertRelation(
+    false,
     '_ShiftSkill',
     global.datastore.key(['Event', parseInt(req.params.eventId), 'Shift', parseInt(req.params.shiftId)]),
-    global.datastore.key(['Event', parseInt(req.params.eventId), 'Skill', parseInt(req.params.skillId)]),
+    global.datastore.key(['Skill', parseInt(req.params.skillId)]),
     res,
     (result) => {
       if (result === true) {
@@ -94,12 +95,12 @@ function addSkill(req, res) {
 function removeSkill(req, res) {
   global.datastore.runQuery(global.datastore.createQuery('_ShiftSkill')
       .filter('shift', global.datastore.key(['Event', parseInt(req.params.eventId), 'Shift', parseInt(req.params.shiftId)]))
-      .filter('skill', global.datastore.key(['Event', parseInt(req.params.eventId), 'Skill', parseInt(req.params.skillId)])),
+      .filter('skill', global.datastore.key(['Skill', parseInt(req.params.skillId)])),
     (err, exists) => {
       if (exists.length === 0) {
         errors.output('relation_not_exist', 'relation does not exist', res)
       } else {
-        global.datastore.delete(global.datastore.key(['Event', parseInt(req.params.eventId), '_ShiftSkill', parseInt(exists[0][global.datastore.KEY].id)]), () => {
+        global.datastore.delete(global.datastore.key(['_ShiftSkill', parseInt(exists[0][global.datastore.KEY].id)]), () => {
           res.json({'status': true})
         })
       }

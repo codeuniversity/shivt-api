@@ -17,6 +17,8 @@ global.datastore = require('@google-cloud/datastore')({
   keyFilename: config.get('datastore.keyFilename')
 })
 
+global.test = 'DIES IST EIN TEST';
+
 app.use(cors())
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
