@@ -31,7 +31,7 @@ function signup (req, res) {
           global.datastore.insert(entity).then(() => {
             let html = fs.readFileSync('mail/signup.html', 'utf8')
               .replace('{name}', req.body.name)
-              .replace('{link}', 'http://localhost:3000/api/v1/signup/activate/'+Buffer.from(hash).toString('base64'))
+              .replace('{link}', 'https://api.shivt.io/v1/signup/activate/'+Buffer.from(hash).toString('base64'))
             let data = {
               from: 'Shivt Team <no-reply@unicode.berlin>',
               to: req.body.mail,
