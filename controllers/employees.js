@@ -20,15 +20,23 @@ function index(req, res) {
 
 function show(req, res) {
 
-  global.datastore.get(global.datastore.key(['Employee', parseInt(req.params.employeeId)]), (err, tmp_employee) => {
-    if (tmp_employee === undefined) {
-      errors.output('employee_not_exist', 'employee does not exist', res)
-    } else {
-      processEmployees(err, tmp_employee, (employee) => {
-        res.json({'status': true, 'shift': employee[0]})
-      })
-    }
-  })
+  if(req.decoded.data === req.params.employeeId || (typeof req.decoded.data) !== 'string') {
+
+    global.datastore.get(global.datastore.key(['Employee', parseInt(req.params.employeeId)]), (err, tmp_employee) => {
+      if (tmp_employee === undefined) {
+        errors.output('employee_not_exist', 'employee does not exist', res)
+      } else {
+        processEmployees(err, tmp_employee, (employee) => {
+          res.json({'status': true, 'employee': employee[0]})
+        })
+      }
+    })
+
+  } else {
+
+    errors.output('not_permitted', 'You are not permitted to perform this action', res);
+
+  }
 
 }
 
@@ -264,6 +272,7 @@ function processEmployees(err, tmp_employees, callback) {
       //handle errors
     }
     let skills = [];
+    let events = [];
     helpers.findInRelationalEntity(
       tmp_employee[global.datastore.KEY],
       '_EmployeeSkill',
@@ -272,10 +281,27 @@ function processEmployees(err, tmp_employees, callback) {
           skills.push(helpers.skillSerializer(tmp_skill))
         })
         employees.push(helpers.employeeSerializer(tmp_employee, helpers.sortByKey(skills, 'name')))
-        if (employees.length === tmp_employees.length) {
-          helpers.sortByKey(employees, 'lastname');
-          callback(employees)
-        }
+        helpers.findInRelationalEntity(
+
+          global.datastore.key(['Employee', parseInt(employees[employees.length-1].id)]),
+          '_EmployeeEvent',
+          (tmp_events) => {
+            tmp_events.forEach((tmp_event) => {
+              events.push({
+                'id': tmp_event[global.datastore.KEY].id,
+                'name': tmp_event.name,
+                'startingDate': tmp_event.startingDate,
+                'endingDate': tmp_event.endingDate,
+                'location': tmp_event.location
+              })
+              console.log(events)
+            })
+            employees[employees.length-1]['events'] = events;
+            if (employees.length === tmp_employees.length) {
+              helpers.sortByKey(employees, 'lastname');
+              callback(employees)
+            }
+          })
       })
   })
 }
