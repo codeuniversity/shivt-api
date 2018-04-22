@@ -154,6 +154,7 @@ function getShifts(req, res) {
           'endingDate': tmp_shift.endingDate,
         })
       })
+      helpers.sortByKey(shifts, 'startingDate');
       res.json({'status': true, 'shifts': shifts})
     })
 
