@@ -1,6 +1,8 @@
 'use strict'
 
 const helpers = require("../util/helpers")
+const errors = require("../util/error_handling")
+
 
 function addShiftEmployee(req, res) {
 
@@ -36,7 +38,7 @@ function removeShiftEmployee(req, res) {
 
 }
 
-function addBlockedTimeEmployee(blockedTimeId, req) {
+function addBlockedTimeEmployee(blockedTimeId, req, res) {
 
   helpers.insertRelation(
     false,
@@ -55,7 +57,7 @@ function addBlockedTimeEmployee(blockedTimeId, req) {
 
 }
 
-function removeBlockedTimeEmployee(req) {
+function removeBlockedTimeEmployee(req, res) {
 
   global.datastore.runQuery(global.datastore.createQuery('_BlockedTimeEmployee')
       .filter('blockedtime', global.datastore.key(['Event', parseInt(req.params.eventId), 'BlockedTime', parseInt(req.params.blockedTimeId)]))

@@ -18,9 +18,10 @@ router.delete('/:employeeId/skills/:skillId', employeeController.removeSkill)
 router.post('/:employeeId/shifts/:shiftId', employeeController.addShift)
 router.delete('/:employeeId/shifts/:shiftId', employeeController.removeShift)
 router.get('/:employeeId/shifts/', employeeController.getShifts)
-router.get('/:employeeId/blocked', employeeController.getBlockedTimes)
-router.post('/:employeeId/blocked', employeeController.addBlockedTime)
-router.delete('/:employeeId/blocked/:blockedTimeId', employeeController.removeBlockedTime)
+router.get('/:employeeId/events/:eventId/blocked', employeeController.getBlockedTimes)
+router.post('/:employeeId/events/:eventId/blocked', employeeController.addBlockedTime)
+router.put('/:employeeId/events/:eventId/blocked/:blockedTimeId', employeeController.updateBlockedTime)
+router.delete('/:employeeId/events/:eventId/blocked/:blockedTimeId', employeeController.removeBlockedTime)
 router.post('/login/', employeeController.login)
 
 module.exports = router

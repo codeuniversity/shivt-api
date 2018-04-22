@@ -176,9 +176,11 @@ function getBlockedTimes(req, res) {
 
   helpers.findInRelationalEntity(
     global.datastore.key(['Employee', parseInt(req.params.employeeId)]),
-    '_BlockedTimesEmployee',
+    '_BlockedTimeEmployee',
     (tmp_blockedtimes) => {
+      console.log(tmp_blockedtimes)
       tmp_blockedtimes.forEach((tmp_blockedtime) => {
+        if(tmp_blockedtime[global.datastore.KEY].parent.id === req.params.eventId)
         blockedTimes.push({
           'id': tmp_blockedtime[global.datastore.KEY].id,
           'startingDate': tmp_blockedtime.startingDate,
@@ -192,7 +194,9 @@ function getBlockedTimes(req, res) {
 
 function addBlockedTime(req, res) {
 
-  if(req.decoded === req.params.employeeId) {
+  console.log(req.decoded);
+
+  if(req.decoded.data === req.params.employeeId) {
 
     const entity = {
       key: global.datastore.key(['Event', parseInt(req.params.eventId), 'BlockedTime']),
@@ -202,10 +206,9 @@ function addBlockedTime(req, res) {
       }
     }
     global.datastore.insert(entity).then((results) => {
+      interchangeable_routes.addBlockedTimeEmployee(results[0].mutationResults[0].key.path[1].id, req, res)
       res.json({'status': true, 'id': results[0].mutationResults[0].key.path[1].id})
     })
-
-    interchangeable_routes.addBlockedTimeEmployee(req, res)
 
   } else {
 
@@ -218,13 +221,35 @@ function addBlockedTime(req, res) {
 function removeBlockedTime(req, res) {
 
   global.datastore.delete(global.datastore.key(['Event', parseInt(req.params.eventId), 'BlockedTime', parseInt(req.params.blockedTimeId)]), () => {
+    interchangeable_routes.removeBlockedTimeEmployee(req, res)
     res.json({'status': true})
   });
 
-  interchangeable_routes.removeBlockedTimeEmployee(req)
+}
 
-  res.json({'status': true})
+function updateBlockedTime(req, res) {
 
+global.datastore.get(global.datastore.key(['Event', parseInt(req.params.eventId), 'BlockedTime', parseInt(req.params.blockedTimeId)]), (err, blockedTime) => {
+  if (blockedTime === undefined) {
+    errors.output('blocked_time_not_exist', 'blocked time does not exist', res)
+  } else {
+    const entity = {
+      key: global.datastore.key(['Event', parseInt(req.params.eventId), 'BlockedTime', parseInt(req.params.blockedTimeId)]),
+      data: {
+        startingDate: req.body.startingDate,
+        endingDate: req.body.endingDate
+      }
+    }
+    global.datastore.update(entity, (err) => {
+      if (err) {
+        if (err.code === 5) {
+          errors.output('blocked_time_not_exist', 'blocked time does not exist', res)
+        }
+      }
+      res.json({'status': true})
+    })
+  }
+})
 }
 
 
@@ -268,6 +293,7 @@ module.exports = {
   getShifts: getShifts,
   getBlockedTimes: getBlockedTimes,
   addBlockedTime: addBlockedTime,
+  updateBlockedTime: updateBlockedTime,
   removeBlockedTime: removeBlockedTime,
   login: login
 }
